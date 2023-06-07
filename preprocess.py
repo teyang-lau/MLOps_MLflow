@@ -1,4 +1,5 @@
 import logging
+import hashlib
 from urllib.parse import unquote, urlparse
 import os
 import tempfile
@@ -18,14 +19,17 @@ from sklearn.model_selection import train_test_split
 def preprocess(filepath, train_ratio, val_ratio, test_ratio):
     with mlflow.start_run() as mlrun:
         artifact_uri = mlrun.info.artifact_uri
-        logger = logging.getLogger()
+        logger = logging.getLogger("mlflow")
         logger.setLevel(logging.DEBUG)
-        logger.addHandler(logging.StreamHandler())
         logger.addHandler(
             logging.FileHandler(
                 unquote(urlparse(os.path.join(artifact_uri, "log.log")).path)
             )
         )
+
+        # hash current file and log it as artifact
+        curr_file_hash = hashlib.md5(open("preprocess.py", "rb").read()).hexdigest()
+        mlflow.log_text(curr_file_hash, "entrypoint_hash/hash.txt")
 
         logger.info("Reading data from {}".format(filepath))
         data = pd.read_csv(filepath)
@@ -89,7 +93,7 @@ def preprocess(filepath, train_ratio, val_ratio, test_ratio):
                     "ohe_features": flat_model_features,
                 },
             },
-            os.path.join("cat_features_schema", "cat_features_schema.json"),
+            os.path.join("schemas", "cat_features_schema.json"),
         )
 
         data_processed = data.copy()
