@@ -1,0 +1,35 @@
+name: HDB Resale Prices Pipeline
+
+python_env: python_env.yaml
+
+entry_points:
+  load_raw_data:
+    command: "python load_raw_data.py"
+
+  preprocess:
+    parameters:
+      filepath: path
+      train_ratio: {type: float, default: 0.7}
+      val_ratio: {type: float, default: 0.2}
+      test_ratio: {type: float, default: 0.1}
+    command: "python preprocess.py --filepath {filepath} --train-ratio {train_ratio} --val-ratio {val_ratio} --test-ratio {test_ratio}"
+
+  train:
+    parameters:
+      datadir: path
+      n_estimators: {type: int, default: 10}
+      max_features: {type: str, default: "sqrt"}
+      max_depth: {type: int, default: 1}
+      min_samples_split: {type: int, default: 2}
+      min_samples_leaf: {type: int, default: 1}
+    command: "python train.py --datadir {datadir} --n-estimators {n_estimators} --max-features {max_features} --max-depth {max_depth} --min-samples-split {min_samples_split} --min-samples-leaf {min_samples_leaf}"
+      
+
+  main:
+    parameters:
+      als_max_iter: {type: int, default: 10}
+      keras_hidden_units: {type: int, default: 20}
+      max_row_limit: {type: int, default: 100000}
+    command: "python main.py --als-max-iter {als_max_iter} --keras-hidden-units {keras_hidden_units}
+                             --max-row-limit {max_row_limit}"
+
