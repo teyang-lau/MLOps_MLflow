@@ -4,3 +4,5 @@ build_dependencies:
 dependencies:
   - mlflow>=1.0
   - click
+  - shap
+  - numpy==1.23
