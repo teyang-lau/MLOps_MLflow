@@ -24,12 +24,25 @@ entry_points:
       min_samples_leaf: {type: int, default: 1}
     command: "python train.py --datadir {datadir} --n-estimators {n_estimators} --max-features {max_features} --max-depth {max_depth} --min-samples-split {min_samples_split} --min-samples-leaf {min_samples_leaf}"
       
+  evaluate:
+    parameters:
+      datadir: path
+      modeldir: path
+    command: "python evaluate.py --datadir {datadir} --modeldir {modeldir}"
 
+  model_validate:
+    parameters:
+      datadir: path
+      modeldir: path
+      test_score: {type: float}
+      eval_threshold: {type: float, default: 150000}
+    command: "python model_validate.py --datadir {datadir} --modeldir {modeldir} --test-score {test_score} --eval-threshold {eval_threshold}"
+  
   main:
     parameters:
-      als_max_iter: {type: int, default: 10}
+      eval_mae_threshold: {type: int, default: 150000}
       keras_hidden_units: {type: int, default: 20}
       max_row_limit: {type: int, default: 100000}
-    command: "python main.py --als-max-iter {als_max_iter} --keras-hidden-units {keras_hidden_units}
+    command: "python main.py --eval-mae-threshold {eval_mae_threshold} --keras-hidden-units {keras_hidden_units}
                              --max-row-limit {max_row_limit}"
 

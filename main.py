@@ -97,20 +97,22 @@ def _get_or_run(entrypoint, parameters, git_commit, use_cache=True):
     submitted_run = mlflow.run(
         ".", entrypoint, parameters=parameters, env_manager="local"
     )
+    print("\n" * 3)
 
     return MlflowClient().get_run(submitted_run.run_id)
 
 
 @click.command()
-@click.option("--als-max-iter", default=10, type=int)
+@click.option("--eval-mae-threshold", default=150000, type=int)
 @click.option("--keras-hidden-units", default=20, type=int)
 @click.option("--max-row-limit", default=100000, type=int)
-def workflow(als_max_iter, keras_hidden_units, max_row_limit):
+def pipeline(eval_mae_threshold, keras_hidden_units, max_row_limit):
     # Note: The entrypoint names are defined in MLproject. The artifact directories
     # are documented by each step's .py file.
     with mlflow.start_run() as active_run:
         git_commit = active_run.data.tags.get(mlflow_tags.MLFLOW_GIT_COMMIT)
 
+        # preprocess run
         preprocess_run = _get_or_run(
             "preprocess",
             {"filepath": "data/resale-flat-prices-2022-jan.csv"},
@@ -119,8 +121,40 @@ def workflow(als_max_iter, keras_hidden_units, max_row_limit):
         datadir_uri = os.path.join(
             preprocess_run.info.artifact_uri, "trainvaltest_data"
         )
+
+        # train run
         train_run = _get_or_run("train", {"datadir": datadir_uri}, git_commit)
+        # modeldir_uri = os.path.join(train_run.info.artifact_uri, "model")
+        modeldir_uri = "runs:/{}/model".format(train_run.info.run_id)
+
+        # evaluate run
+        evaluate_run = _get_or_run(
+            "evaluate", {"datadir": datadir_uri, "modeldir": modeldir_uri}, git_commit
+        )
+
+        # model validation run
+        test_mae = evaluate_run.data.metrics.get("test_mae", float("inf"))
+        model_validation_run = _get_or_run(
+            "model_validate",
+            {
+                "datadir": datadir_uri,
+                "modeldir": modeldir_uri,
+                "test_score": test_mae,
+                "eval_threshold": eval_mae_threshold,
+            },
+            git_commit,
+        )
+
+        # register model based on condition (checked in validation run)
+        if model_validation_run.data.tags.get("validation_status") != "pass":
+            return
+        # register
+        model_version = mlflow.register_model(
+            modeldir_uri,
+            "random_forest_regressor_HDB_Resale_Price",
+        )
+        # print("Name: {}, Version: {}".format(model_version.name, model_version.version))
 
 
 if __name__ == "__main__":
-    workflow()
+    pipeline()
