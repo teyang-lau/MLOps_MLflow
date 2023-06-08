@@ -25,7 +25,6 @@ def train(
 ):
     with mlflow.start_run() as mlrun:
         artifact_uri = mlrun.info.artifact_uri
-        print("HIHI", artifact_uri)
         logger = logging.getLogger("mlflow")
         logger.setLevel(logging.DEBUG)
         logger.addHandler(
