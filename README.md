@@ -4,6 +4,7 @@
 - [ ] Pass multiple params into subsequent runs down the pipeline
 - [ ] Using caching for runs that were ran before. Still does not work for dependant runs. For eg., if data in preprocess changes, only preprocess run will run, while training will not, since train script is not modified
 - [ ] Get mlflow logs written in log file
+- [ ] Try moving all scripts to scripts folder and make it work
 - [x] Create experiments name for the pipeline
 
 ## Logs
