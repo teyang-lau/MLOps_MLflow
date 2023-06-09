@@ -33,3 +33,19 @@ def fetch_logged_data(run_id):
     tags = {k: v for k, v in data.tags.items() if not k.startswith("mlflow.")}
     artifacts = [f.path for f in client.list_artifacts(run_id, "model")]
     return data.params, data.metrics, tags, artifacts
+
+
+def infer_schema(df):
+    schema = {}
+    for col in df.columns:
+        dt = df[col].dtype
+        if dt.kind in "iufc":
+            schema[col] = {
+                "type": str(dt),
+                "min": float(df[col].min()),
+                "max": float(df[col].max()),
+            }
+        else:  # object
+            schema[col] = {"type": str(dt), "domain": list(set(df[col]))}
+
+    return schema
