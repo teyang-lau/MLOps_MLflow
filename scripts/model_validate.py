@@ -27,7 +27,9 @@ def model_validate(datadir, modeldir, test_score, eval_threshold):
         )
 
         # hash current file and log it as artifact
-        curr_file_hash = hashlib.md5(open("model_validate.py", "rb").read()).hexdigest()
+        curr_file_hash = hashlib.md5(
+            open("scripts/model_validate.py", "rb").read()
+        ).hexdigest()
         mlflow.log_text(curr_file_hash, "entrypoint_hash/hash.txt")
 
         # check if test score satisfy threshold, if no, end model validation

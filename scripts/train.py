@@ -34,7 +34,7 @@ def train(
         )
 
         # hash current file and log it as artifact
-        curr_file_hash = hashlib.md5(open("train.py", "rb").read()).hexdigest()
+        curr_file_hash = hashlib.md5(open("scripts/train.py", "rb").read()).hexdigest()
         mlflow.log_text(curr_file_hash, "entrypoint_hash/hash.txt")
 
         train_path = os.path.join(datadir, "train.csv")
