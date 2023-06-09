@@ -28,7 +28,9 @@ def preprocess(filepath, train_ratio, val_ratio, test_ratio):
         )
 
         # hash current file and log it as artifact
-        curr_file_hash = hashlib.md5(open("preprocess.py", "rb").read()).hexdigest()
+        curr_file_hash = hashlib.md5(
+            open("scripts/preprocess.py", "rb").read()
+        ).hexdigest()
         mlflow.log_text(curr_file_hash, "entrypoint_hash/hash.txt")
 
         logger.info("Reading data from {}".format(filepath))

@@ -12,7 +12,7 @@ entry_points:
       train_ratio: {type: float, default: 0.7}
       val_ratio: {type: float, default: 0.2}
       test_ratio: {type: float, default: 0.1}
-    command: "python preprocess.py --filepath {filepath} --train-ratio {train_ratio} --val-ratio {val_ratio} --test-ratio {test_ratio}"
+    command: "python scripts/preprocess.py --filepath {filepath} --train-ratio {train_ratio} --val-ratio {val_ratio} --test-ratio {test_ratio}"
 
   train:
     parameters:
@@ -22,13 +22,13 @@ entry_points:
       max_depth: {type: int, default: 1}
       min_samples_split: {type: int, default: 2}
       min_samples_leaf: {type: int, default: 1}
-    command: "python train.py --datadir {datadir} --n-estimators {n_estimators} --max-features {max_features} --max-depth {max_depth} --min-samples-split {min_samples_split} --min-samples-leaf {min_samples_leaf}"
+    command: "python scripts/train.py --datadir {datadir} --n-estimators {n_estimators} --max-features {max_features} --max-depth {max_depth} --min-samples-split {min_samples_split} --min-samples-leaf {min_samples_leaf}"
       
   evaluate:
     parameters:
       datadir: path
       modeldir: path
-    command: "python evaluate.py --datadir {datadir} --modeldir {modeldir}"
+    command: "python scripts/evaluate.py --datadir {datadir} --modeldir {modeldir}"
 
   model_validate:
     parameters:
@@ -36,13 +36,13 @@ entry_points:
       modeldir: path
       test_score: {type: float}
       eval_threshold: {type: float, default: 150000}
-    command: "python model_validate.py --datadir {datadir} --modeldir {modeldir} --test-score {test_score} --eval-threshold {eval_threshold}"
+    command: "python scripts/model_validate.py --datadir {datadir} --modeldir {modeldir} --test-score {test_score} --eval-threshold {eval_threshold}"
   
   main:
     parameters:
       eval_mae_threshold: {type: int, default: 150000}
       keras_hidden_units: {type: int, default: 20}
       max_row_limit: {type: int, default: 100000}
-    command: "python main.py --eval-mae-threshold {eval_mae_threshold} --keras-hidden-units {keras_hidden_units}
+    command: "python scripts/main.py --eval-mae-threshold {eval_mae_threshold} --keras-hidden-units {keras_hidden_units}
                              --max-row-limit {max_row_limit}"
 

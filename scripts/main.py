@@ -25,7 +25,7 @@ def _already_ran(entry_point_name, parameters, git_commit, experiment_id=None):
     """
     experiment_id = experiment_id if experiment_id is not None else _get_experiment_id()
     curr_file_hash = hashlib.md5(
-        open(entry_point_name + ".py", "rb").read()
+        open("scripts/" + entry_point_name + ".py", "rb").read()
     ).hexdigest()
     client = MlflowClient()
     all_runs = reversed(client.search_runs([experiment_id]))
