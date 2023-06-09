@@ -28,7 +28,7 @@ def _already_ran(entry_point_name, parameters, git_commit, experiment_id=None):
         open("scripts/" + entry_point_name + ".py", "rb").read()
     ).hexdigest()
     client = MlflowClient()
-    all_runs = reversed(client.search_runs([experiment_id]))
+    all_runs = client.search_runs([experiment_id])  # default is sorted by runtime desc
     for run in all_runs:
         tags = run.data.tags
         if tags.get(mlflow_tags.MLFLOW_PROJECT_ENTRY_POINT, None) != entry_point_name:
@@ -36,7 +36,7 @@ def _already_ran(entry_point_name, parameters, git_commit, experiment_id=None):
         match_failed = False
         for param_key, param_value in parameters.items():
             run_value = run.data.params.get(param_key)
-            if run_value != param_value:
+            if str(run_value) != str(param_value):
                 match_failed = True
                 break
         if match_failed:
@@ -72,6 +72,7 @@ def _already_ran(entry_point_name, parameters, git_commit, experiment_id=None):
             continue
 
         return client.get_run(run.info.run_id)
+
     eprint("No matching run has been found.")
     return None
 
@@ -88,6 +89,7 @@ def _get_or_run(entrypoint, parameters, git_commit, use_cache=True):
                 entrypoint, parameters
             )
         )
+        mlflow.set_tag(entrypoint, existing_run.info.run_id)
         return existing_run
     print(
         "Launching new run for entrypoint={} and parameters={}".format(
@@ -98,6 +100,8 @@ def _get_or_run(entrypoint, parameters, git_commit, use_cache=True):
         ".", entrypoint, parameters=parameters, env_manager="local"
     )
     print("\n" * 3)
+
+    mlflow.set_tag(entrypoint, submitted_run.run_id)
 
     return MlflowClient().get_run(submitted_run.run_id)
 
@@ -133,7 +137,7 @@ def pipeline(eval_mae_threshold, keras_hidden_units, max_row_limit):
         )
 
         # model validation run
-        test_mae = evaluate_run.data.metrics.get("test_mae", float("inf"))
+        test_mae = round(evaluate_run.data.metrics.get("test_mae", float("inf")), 2)
         model_validation_run = _get_or_run(
             "model_validate",
             {
