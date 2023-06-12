@@ -36,7 +36,6 @@
 <br>
 
 ## To Do
-- [ ] Data & Model Validation
 - [ ] Jensen Shannon divergence for data drift
 - [ ] Hyperparameter tuning
 - [ ] Log immediate parent run
@@ -44,12 +43,14 @@
 - [ ] Get mlflow logs written in log file
 - [ ] Using caching for runs that were ran before. Still does not work for dependant runs. For eg., if data in preprocess changes, only preprocess run will run, while training will not, since train script is not modified
 - [ ] Try to keep track of whether a run was modified before. If so, all subsequent runs will have to run! (maybe have a var to keep track if previous runs were ran. If so, all subsequent children runs must run again)
+- [x] Data & Model Validation
 - [x] Try moving all scripts to scripts folder and make it work
 - [x] Create experiments name for the pipeline
 
 <br>
 
 ## Logs
+* 12 Jun — data_validate.py works. It compares against previous schema from the latest successful run, if any, and logs current schema. Also validates for missing data and stops the run if any are found. Improved logging and formatting.
 * 9 Jun — logged all `run_id`s in main.py and created function to infer basic schema of pandas dataframe for data validation. Wrote prelim schema checks that will check for data types and range of values for numeric columns and domain values for object columns 
 * 8 Jun — evaluation.py and model_validate.py works. Also integrated SHAP model explanability check into model validation step, which will log the shap plots and the explainer
 * 7 Jun — Got MLproject pipeline with just preprocess step working. Can just run `mlflow run .` in directory. Created hash checking to make the run runs if code changes. train.py works for taking data from previous step and training and validating model
