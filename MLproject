@@ -6,6 +6,11 @@ entry_points:
   load_raw_data:
     command: "python load_raw_data.py"
 
+  data_validate:
+    parameters:
+      filepath: path
+    command: "python scripts/data_validate.py --filepath {filepath}"
+
   preprocess:
     parameters:
       filepath: path

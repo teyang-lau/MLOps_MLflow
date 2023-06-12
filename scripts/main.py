@@ -116,6 +116,15 @@ def pipeline(eval_mae_threshold, keras_hidden_units, max_row_limit):
     with mlflow.start_run() as active_run:
         git_commit = active_run.data.tags.get(mlflow_tags.MLFLOW_GIT_COMMIT)
 
+        # data validation run
+        data_validate_run = _get_or_run(
+            "data_validate",
+            {"filepath": "data/resale-flat-prices-2022-jan.csv"},
+            git_commit,
+        )
+        if data_validate_run.data.tags.get("validation_status") != "pass":
+            return
+
         # preprocess run
         preprocess_run = _get_or_run(
             "preprocess",
