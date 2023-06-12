@@ -1,3 +1,5 @@
+import logging
+import warnings
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 from mlflow import MlflowClient
@@ -49,3 +51,62 @@ def infer_schema(df):
             schema[col] = {"type": str(dt), "domain": list(set(df[col]))}
 
     return schema
+
+
+def compare_data_to_schema(data, schema):
+    # logger = logging.getLogger(__name__)
+    # warnings_logger = logging.getLogger("py.warnings")
+    logging.captureWarnings(True)
+
+    data_cols = data.columns
+    for col in schema.keys():
+        if col not in data_cols:
+            print("Column `{}` is missing from dataset".format(col))
+            return "Failed"
+    for col in data_cols:
+        if col not in schema:
+            print("Column `{}` does not exist in schema".format(col))
+            return "Failed"
+        dt = data[col].dtype
+        if dt.kind in "iufc":  # if numeric
+            if dt != schema[col]["type"]:
+                print(
+                    'Expected column `{}` to be "{}" but got "{}"'.format(
+                        col, schema[col]["type"], dt
+                    )
+                )
+                print("Terminating data validation ...")
+                return "Failed"
+            d_max, d_min = data[col].max(), data[col].min()
+            if d_max > schema[col]["max"]:
+                warnings.warn(
+                    "Column `{}` has values ({}) higher than max of schema ({})".format(
+                        col, d_max, schema[col]["max"]
+                    )
+                )
+            if d_min < schema[col]["min"]:
+                warnings.warn(
+                    "Column `{}` has values ({}) lower than min of schema ({})".format(
+                        col, d_min, schema[col]["min"]
+                    )
+                )
+        else:  # if object
+            if dt != schema[col]["type"]:
+                print(
+                    'Expected column `{}` to be "{}" but got "{}"'.format(
+                        col, schema[col]["type"], dt
+                    )
+                )
+                print("Terminating data validation ...")
+                return "Failed"
+            # check if each columns contain values not present in previous domain
+            old_set = set(schema[col]["domain"])
+            diff = set(data[col]).difference(old_set)
+            if diff:
+                warnings.warn(
+                    'Column `{}` domain contains "{}" that are not present in schema'.format(
+                        col, diff
+                    )
+                )
+
+    return "Passed"
