@@ -48,7 +48,7 @@ def infer_schema(df):
                 "max": float(df[col].max()),
             }
         else:  # object
-            schema[col] = {"type": str(dt), "domain": list(set(df[col]))}
+            schema[col] = {"type": str(dt), "domain": sorted(list(set(df[col])))}
 
     return schema
 
@@ -101,10 +101,10 @@ def compare_data_to_schema(data, schema):
                 return "Failed"
             # check if each columns contain values not present in previous domain
             old_set = set(schema[col]["domain"])
-            diff = set(data[col]).difference(old_set)
+            diff = sorted(set(data[col]).difference(old_set))
             if diff:
                 warnings.warn(
-                    'Column `{}` domain contains "{}" that are not present in schema'.format(
+                    "Column `{}` domain contains {} that are not present in schema".format(
                         col, diff
                     )
                 )
