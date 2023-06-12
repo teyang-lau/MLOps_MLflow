@@ -2,6 +2,7 @@ import logging
 import hashlib
 from urllib.parse import unquote, urlparse
 import os
+import sys
 import tempfile
 import mlflow
 import click
@@ -19,13 +20,27 @@ from sklearn.model_selection import train_test_split
 def preprocess(filepath, train_ratio, val_ratio, test_ratio):
     with mlflow.start_run() as mlrun:
         artifact_uri = mlrun.info.artifact_uri
-        logger = logging.getLogger("mlflow")
+
+        # logging
+        logger = logging.getLogger()
         logger.setLevel(logging.DEBUG)
-        logger.addHandler(
-            logging.FileHandler(
-                unquote(urlparse(os.path.join(artifact_uri, "log.log")).path)
-            )
+        logging.captureWarnings(True)
+        formatter = logging.Formatter(
+            "%(asctime)s - %(levelname)s - %(message)s", "%Y-%m-%d %H:%M:%S"
         )
+
+        file_handler = logging.FileHandler(
+            unquote(urlparse(os.path.join(artifact_uri, "log.log")).path)
+        )
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(formatter)
+
+        stdout_handler = logging.StreamHandler(sys.stdout)
+        stdout_handler.setLevel(logging.DEBUG)
+        stdout_handler.setFormatter(formatter)
+
+        logger.addHandler(file_handler)
+        logger.addHandler(stdout_handler)
 
         # hash current file and log it as artifact
         curr_file_hash = hashlib.md5(
