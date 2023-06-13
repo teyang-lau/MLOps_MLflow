@@ -34,4 +34,4 @@ jobs:
             - name: Test Code
               run: |
                 mlflow experiments create -n pipeline_test
-                mlflow run --experiment-name pipeline_test .
+                mlflow run --experiment-name pipeline_test . --env-manager=local
