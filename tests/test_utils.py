@@ -3,7 +3,7 @@ import pandas as pd
 from scripts.utils import onehotencode, infer_schema, compare_data_to_schema
 
 
-# # #
+# # # #
 def test_onehotencode():
     data = pd.DataFrame({"numeric": [1.0, 2.0, 3.0], "object": ["foo", "bar", "baz"]})
     data, ohe_features, categories = onehotencode(data, "object")
